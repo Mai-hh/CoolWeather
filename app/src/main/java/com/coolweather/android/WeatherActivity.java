@@ -6,6 +6,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.coolweather.android.gson.Forecast;
 import com.coolweather.android.gson.Weather;
+import com.coolweather.android.service.AutoUpdateService;
 import com.coolweather.android.util.HttpUtility;
 import com.coolweather.android.util.Utility;
 
@@ -35,7 +37,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class WeatherActivity extends AppCompatActivity {
-    private static final String TAG = "WeatherActivity";
+    private static final String TAG = "WeatherActivity1";
 
     public DrawerLayout drawerLayout;
 
@@ -57,12 +59,12 @@ public class WeatherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        loadBingPic();
         mixStatusBar();
 
         setContentView(R.layout.activity_weather);
 
         init();
-
 
     }
 
@@ -81,24 +83,22 @@ public class WeatherActivity extends AppCompatActivity {
         forecastLayout = (LinearLayout) findViewById(R.id.forecast_layout);
         bingPicImg = (ImageView) findViewById(R.id.bing_pic_img);
         swipeRefresh =(SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
-        swipeRefresh.setColorSchemeResources(R.color.design_default_color_on_primary);//todo：换颜色
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         navButton = (Button) findViewById(R.id.nav_button);
 
+        swipeRefresh.setColorSchemeResources(R.color.lightblue);
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = preferences.getString("weather", null);
-        if (weatherString != null) {
 
+        if (weatherString != null) {
             Weather weather = Utility.handleWeatherResponse(weatherString);
             mWeatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
-
         } else {
-
             mWeatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(mWeatherId);
-
         }
 
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -109,6 +109,7 @@ public class WeatherActivity extends AppCompatActivity {
         });
 
         String bingPic = preferences.getString("bing_pic", null);
+
         if (bingPic != null) {
             Glide.with(this).load(bingPic).into(bingPicImg);
         } else {
@@ -129,7 +130,7 @@ public class WeatherActivity extends AppCompatActivity {
      */
 
     private void loadBingPic() {
-
+        Log.d(TAG, "请求每日一图");
         HttpUtility.sendRetrofitRequest("http://guolin.tech/api/");
         Call<ResponseBody> call = HttpUtility.getDataByRequest().getBingPic();
         call.enqueue(new Callback<ResponseBody>() {
@@ -145,7 +146,7 @@ public class WeatherActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
+                Log.d(TAG, bingPic);
                 final String finalBingPic = bingPic;
                 runOnUiThread(new Runnable() {
                     @Override
@@ -157,6 +158,7 @@ public class WeatherActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d(TAG, "每日一图请求失败");
                 t.printStackTrace();
             }
         });
@@ -164,7 +166,7 @@ public class WeatherActivity extends AppCompatActivity {
 
 
     public void requestWeather(final String weatherId) {
-
+        Log.d(TAG, "网络请求天气信息" + "http://guolin.tech/api/weather?cityid=" + weatherId + "&key=" + getString(R.string.key));
         HttpUtility.sendRetrofitRequest("http://guolin.tech/api/");
         Call<ResponseBody> call = HttpUtility.getDataByRequest().getWeatherData(weatherId, getString(R.string.key));
         call.enqueue(new Callback<ResponseBody>() {
@@ -179,7 +181,7 @@ public class WeatherActivity extends AppCompatActivity {
                 }
 
                 final Weather weather = Utility.handleWeatherResponse(responseText);
-
+                Log.d(TAG, "获取天气返回数据: " + responseText);
                 String finalResponseText = responseText;
                 runOnUiThread(new Runnable() {
                     @Override
@@ -229,6 +231,7 @@ public class WeatherActivity extends AppCompatActivity {
         degreeText.setText(degree);
         weatherInfoText.setText(weatherInfo);
         forecastLayout.removeAllViews();
+
         for (Forecast forecast : weather.forecastList) {
 
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item, forecastLayout, false);
@@ -251,21 +254,23 @@ public class WeatherActivity extends AppCompatActivity {
             pm25Text.setText(weather.aqi.city.pm25);
         }
 
-        String comfort = "舒适度: " + weather.suggestion.comfort.info;
-        String carWash = "洗车指数: " + weather.suggestion.carWash.info;
-        String sport = "运动建议: " + weather.suggestion.sport.info;
+        String comfort = "舒适度： " + weather.suggestion.comfort.info;
+        String carWash = "洗车建议： " + weather.suggestion.carWash.info;
+        String sport = "运动建议： " + weather.suggestion.sport.info;
 
         comfortText.setText(comfort);
         carWashText.setText(carWash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
+
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 
     private void mixStatusBar() {
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_FULLSCREEN);
         getWindow().setStatusBarColor(Color.TRANSPARENT);

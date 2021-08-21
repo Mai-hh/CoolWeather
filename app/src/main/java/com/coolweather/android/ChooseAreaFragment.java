@@ -129,11 +129,13 @@ public class ChooseAreaFragment extends Fragment {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 if (currentLevel == LEVEL_COUNTY) {
                     queryCities();
                 } else if (currentLevel == LEVEL_CITY) {
                     queryProvinces();
                 }
+
             }
         });
 
@@ -144,12 +146,13 @@ public class ChooseAreaFragment extends Fragment {
         Log.d(TAG, "初始化省");
 
         titleText.setText("中国");
-
         backButton.setVisibility(View.GONE);
+        provinceList.clear();
 
         SQLiteDatabase db = sqlHelper.getWritableDatabase();
         Cursor cursor = db.query("Province", null, null, null, null, null, null);
         Log.d(TAG, "数据库查询省");
+
         if (cursor.moveToFirst()) {
             do {
                 Province province = new Province();
@@ -162,20 +165,20 @@ public class ChooseAreaFragment extends Fragment {
                 provinceList.add(province);
             } while (cursor.moveToNext());
         }
+
         cursor.close();
         Log.d(TAG, "数据库查询省结束");
-        if (provinceList.size() > 0) {
 
+        if (provinceList.size() > 0) {
             dataList.clear();
 
             for (Province province : provinceList) {
                 dataList.add(province.getProvinceName());
             }
+
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
-
             currentLevel = LEVEL_PROVINCE;
-
         } else {
             Log.d(TAG, "网络请求\"http://guolin.tech/api/china\"");
             queryFromServer("province");
@@ -191,6 +194,7 @@ public class ChooseAreaFragment extends Fragment {
         Log.d(TAG, "数据库查询市");
         SQLiteDatabase db = sqlHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM City WHERE provinceId = ?", new String[] { String.valueOf(selectedProvince.getProvinceCode()) });
+
         if (cursor.moveToFirst()) {
             do {
                 City city = new City();
@@ -207,18 +211,17 @@ public class ChooseAreaFragment extends Fragment {
 
             } while (cursor.moveToNext());
         }
+
         cursor.close();
         Log.d(TAG, "数据库查询市结束");
+
         if (cityList.size() > 0) {
-
             dataList.clear();
-
             for (City city : cityList) {
                 dataList.add(city.getCityName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
-
             currentLevel = LEVEL_CITY;
         } else {
                 int provinceCode = selectedProvince.getProvinceCode();
@@ -237,6 +240,7 @@ public class ChooseAreaFragment extends Fragment {
         SQLiteDatabase db = sqlHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM County WHERE cityId = ?", new String[] { String.valueOf(selectedCity.getCityCode()) });
         Log.d(TAG, "状态"+cursor.moveToFirst());
+
         if (cursor.moveToFirst()) {
             Log.d(TAG, "开始循环");
             do {
@@ -253,18 +257,17 @@ public class ChooseAreaFragment extends Fragment {
                 countyList.add(county);
             } while (cursor.moveToNext());
         }
+
         cursor.close();
         Log.d(TAG, "数据库查询县结束, " + "列表长度: " + countyList.size());
+
         if (countyList.size() > 0) {
-
             dataList.clear();
-
             for (County county : countyList) {
                 dataList.add(county.getCountyName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
-
             currentLevel = LEVEL_COUNTY;
         } else {
             int provinceCode = selectedProvince.getProvinceCode();
@@ -274,7 +277,7 @@ public class ChooseAreaFragment extends Fragment {
         }
     }
 
-    //todo:处理回调部分
+
     private void queryFromServer(String type) {
         showProgressDialog();
         HttpUtility.sendRetrofitRequest("http://guolin.tech/api/");
@@ -285,19 +288,23 @@ public class ChooseAreaFragment extends Fragment {
                 String responseText = null;
                 Log.d(TAG, "开始解析返回数据");
                 try {
+
                     if (response.body() != null) {
                         responseText = response.body().string();
                         Log.d(TAG, responseText);
                     }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
                 Log.d(TAG, "处理返回数据");
                 boolean result = false;
+
                 if ("province".equals(type)) {
                     result = Utility.handleProvinceResponse(responseText, sqlHelper);
                 }
+
                 if (result) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -333,17 +340,21 @@ public class ChooseAreaFragment extends Fragment {
                 String responseText = null;
                 Log.d(TAG, "开始解析返回数据");
                 try {
+
                     if (response.body() != null) {
                         responseText = response.body().string();
                         Log.d(TAG, responseText);
                     }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 boolean result = false;
+
                 if ("city".equals(type)) {
                     result = Utility.handleCityResponse(responseText, code, sqlHelper);
                 }
+
                 if (result) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -374,17 +385,21 @@ public class ChooseAreaFragment extends Fragment {
                 String responseText = null;
                 Log.d(TAG, "开始解析返回数据");
                 try {
+
                     if (response.body() != null) {
                         responseText = response.body().string();
                         Log.d(TAG, responseText);
                     }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 boolean result = false;
+
                 if ("county".equals(type)) {
                     result = Utility.handleCountyResponse(responseText, code2, sqlHelper);
                 }
+
                 if (result) {
                     queryCounties();
                     closeProgressDialog();
@@ -400,17 +415,21 @@ public class ChooseAreaFragment extends Fragment {
     }
 
     private void showProgressDialog() {
+
         if (progressDialog == null) {
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setMessage("光速加载中...");
             progressDialog.setCanceledOnTouchOutside(false);
         }
+
         progressDialog.show();
     }
 
     private void closeProgressDialog() {
+
         if (progressDialog != null) {
             progressDialog.dismiss();
         }
+
     }
 }
