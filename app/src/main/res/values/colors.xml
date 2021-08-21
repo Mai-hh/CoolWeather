@@ -7,4 +7,17 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="offwhite">#faf9f9</color>
+    <color name="lightblue">#a0c4ff</color>
+    <color name="grey">#89888d</color>
+    <color name="darkgrey">#46494c</color>
+    <color name="lighterblack">#1c1c1e</color>
+    <color name="orange">#ffb703</color>
+    <color name="blue">#86A8E7</color>
+    <color name="lightorange">#FFD700</color>
+    <color name="samsungwhite">#fafafa</color>
+    <color name="samsungblack">#171717</color>
+    <color name="iosblack">#1c1c1e</color>
+    <color name="ioswhiteBG">#f7f7f7</color>
+    <color name="lightgrey">#aeb0b2</color>
 </resources>

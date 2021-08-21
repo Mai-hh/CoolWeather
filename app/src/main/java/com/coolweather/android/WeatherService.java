@@ -1,9 +1,5 @@
 package com.coolweather.android;
 
-import com.coolweather.android.model.Weather;
-
-import java.util.List;
-
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -23,4 +19,7 @@ public interface WeatherService {
 
     @GET("{proid}/{cityid}")
     Call<ResponseBody> getCounties(@Path("proid") int provinceId, @Path("cityid") int cityId);
+
+    @GET("bing_pic")
+    Call<ResponseBody> getBingPic();
 }

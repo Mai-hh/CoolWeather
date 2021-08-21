@@ -2,6 +2,7 @@ package com.coolweather.android;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -107,6 +108,12 @@ public class ChooseAreaFragment extends Fragment {
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
                     queryCounties();
+                } else if (currentLevel == LEVEL_COUNTY) {
+                    String weatherId = countyList.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id", weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -277,14 +284,7 @@ public class ChooseAreaFragment extends Fragment {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                try {
-                    if (response.body() != null) {
-                        responseText = response.body().string();
-                        Log.d(TAG, responseText);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
                 Log.d(TAG, "处理返回数据");
                 boolean result = false;
                 if ("province".equals(type)) {

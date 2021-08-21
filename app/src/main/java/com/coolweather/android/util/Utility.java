@@ -6,6 +6,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.coolweather.android.database.WeatherSQLHelper;
+import com.coolweather.android.gson.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,8 +69,10 @@ public class Utility {
     public static boolean handleCountyResponse(String response, int cityId, WeatherSQLHelper sqlHelper) {
         if (!TextUtils.isEmpty(response)) {
             try {
+
                 JSONArray allCounties = new JSONArray(response);
                 for (int i = 0; i < allCounties.length(); i++) {
+
                     JSONObject countyObject = allCounties.getJSONObject(i);
                     SQLiteDatabase db = sqlHelper.getWritableDatabase();
                     String countyName = countyObject.getString("name");
@@ -80,6 +84,7 @@ public class Utility {
                     values.put("cityId", cityId);
                     db.insert("County", null, values);
                     values.clear();
+
                 }
                 return true;
             } catch (JSONException e) {
@@ -88,4 +93,19 @@ public class Utility {
         }
         return false;
     }
+
+    public static Weather handleWeatherResponse(String response) {
+
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            String weatherContent = jsonArray.getJSONObject(0).toString();
+            return new Gson().fromJson(weatherContent, Weather.class);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }

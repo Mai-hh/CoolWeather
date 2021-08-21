@@ -1,9 +1,6 @@
 package com.coolweather.android.util;
 
-import android.util.Log;
-
 import com.coolweather.android.WeatherService;
-import com.coolweather.android.model.Weather;
 
 import retrofit2.Retrofit;
 
