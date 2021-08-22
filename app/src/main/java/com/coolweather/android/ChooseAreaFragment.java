@@ -322,7 +322,7 @@ public class ChooseAreaFragment extends Fragment {
                     @Override
                     public void run() {
                         closeProgressDialog();
-                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "加载失败，请检查网络连接后重试", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -330,7 +330,7 @@ public class ChooseAreaFragment extends Fragment {
     }
 
     private void queryFromServer(String type, int code) {
-        Log.d(TAG, "网络查询市级数据");
+        Log.d(TAG, "网络查询市级数据" + "http://guolin.tech/api/china/" + code);
         showProgressDialog();
         HttpUtility.sendRetrofitRequest("http://guolin.tech/api/china/");
         Call<ResponseBody> call = HttpUtility.getDataByRequest().getCities(code);
@@ -375,7 +375,7 @@ public class ChooseAreaFragment extends Fragment {
     }
 
     private void queryFromServer(String type, int code1, int code2) {
-        Log.d(TAG, "网络查询县级数据" + "cityid: " + code1 + "/" + "countyid: " + code2);
+        Log.d(TAG, "网络查询县级数据" + "http://guolin.tech/api/china/" + code1 + "/" + code2);
         showProgressDialog();
         HttpUtility.sendRetrofitRequest("http://guolin.tech/api/china/");
         Call<ResponseBody> call = HttpUtility.getDataByRequest().getCounties(code1, code2);

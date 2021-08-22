@@ -11,9 +11,7 @@ import android.preference.PreferenceManager;
 import com.coolweather.android.database.WeatherSQLHelper;
 
 public class MainActivity extends AppCompatActivity {
-
-    private WeatherSQLHelper sqlHelper;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
